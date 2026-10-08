@@ -1,7 +1,7 @@
 //! Fill & Sign (Acrobat's Fill & Sign tool, execution plan M5.7): type text onto the page, place
-//! ✓ ✕ ● ─ marks and today's date, and sign with a drawn signature. Everything is an annotation
-//! (typewriter text, PdfCraft-drawn stamps, ink), so it can be moved, deleted and undone like
-//! any comment.
+//! ✓ ✕ ● ─ marks and today's date (in Preferences ▸ Date format), and sign with a drawn
+//! signature. Everything is an annotation (typewriter text, PdfCraft-drawn stamps, ink), so it
+//! can be moved, deleted and undone like any comment.
 
 use egui::{Color32, CornerRadius, Pos2, Sense, Stroke, pos2, vec2};
 use pdfcraft_engine::{Edit, FillMark, NewAnnotation, Shape, SignatureImage, Style};
@@ -367,7 +367,7 @@ pub(crate) fn page_input(
     initials: Option<&SavedSig>,
     preview: &mut Option<(SavedSig, egui::TextureHandle)>,
     author: &str,
-    today: (i64, u32, u32),
+    date_text: &str,
 ) -> Option<FillAction> {
     let pointer = ui.input(|i| i.pointer.hover_pos())?;
     if !resp.contains_pointer() || !xf.rect.contains(pointer) {
@@ -396,10 +396,7 @@ pub(crate) fn page_input(
             view.fill_text = Some(TypeBox { page, at: [at[0], at[1] + TEXT_SIZE * 0.6], text: String::new(), focus: true });
             None
         }
-        FillTool::Date => {
-            let (y, m, d) = today;
-            Some(FillAction::Edit(Box::new(typed(page, [at[0], at[1] + TEXT_SIZE * 0.6], &format!("{m}/{d}/{y}"), author))))
-        }
+        FillTool::Date => Some(FillAction::Edit(Box::new(typed(page, [at[0], at[1] + TEXT_SIZE * 0.6], date_text, author)))),
         FillTool::Signature => match signature {
             Some(s) => place(page, at, s, false, author).map(|e| FillAction::Signature(Box::new(e))),
             None => Some(FillAction::CreateSignature),

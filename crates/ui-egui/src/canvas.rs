@@ -1341,6 +1341,8 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
     let mut open_initials = false;
     let author = app.comment_prefs.author.clone();
     let today = app.session.today();
+    // In Preferences ▸ Date format (always valid, so this never falls back).
+    let date_text = crate::date_text(&app.session, None).unwrap_or_default();
     let by_line = app.session.stamp_by_line(&author);
     let mut stamp_placed = false;
     let mut image_action: Option<crate::edit_text_ui::ImageAction> = None;
@@ -1581,7 +1583,7 @@ pub fn document_area(app: &mut PdfCraftApp, index: usize, ui: &mut egui::Ui) {
                     initials.as_ref(),
                     &mut app.signature_preview,
                     &author,
-                    today,
+                    &date_text,
                 ) {
                     Some(crate::fill_sign::FillAction::Edit(e)) => view.pending_edit = Some(*e),
                     Some(crate::fill_sign::FillAction::Signature(e)) => {
