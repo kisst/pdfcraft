@@ -53,7 +53,7 @@ const ZH_DAYS: [&str; 7] = ["星期日", "星期一", "星期二", "星期三", 
 
 /// The languages month and weekday names can be written in (Preferences ▸ Date format ▸ Language):
 /// the interface languages, in the same order and with the same names.
-pub const DATE_LANGUAGES: [DateLanguage; 10] = [
+pub const DATE_LANGUAGES: [DateLanguage; 14] = [
     DateLanguage {
         code: "en",
         name: "English",
@@ -122,6 +122,15 @@ pub const DATE_LANGUAGES: [DateLanguage; 10] = [
         days_short: ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"],
     },
     DateLanguage {
+        code: "de",
+        name: "Deutsch",
+        months: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+        months_with_day: None,
+        months_short: ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sept.", "Okt.", "Nov.", "Dez."],
+        days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+        days_short: ["So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa."],
+    },
+    DateLanguage {
         code: "es",
         name: "Español",
         months: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
@@ -149,6 +158,15 @@ pub const DATE_LANGUAGES: [DateLanguage; 10] = [
         days_short: ["вс", "пн", "вт", "ср", "чт", "пт", "сб"],
     },
     DateLanguage {
+        code: "bg",
+        name: "Български",
+        months: ["януари", "февруари", "март", "април", "май", "юни", "юли", "август", "септември", "октомври", "ноември", "декември"],
+        months_with_day: None,
+        months_short: ["яну", "фев", "март", "апр", "май", "юни", "юли", "авг", "сеп", "окт", "ное", "дек"],
+        days: ["неделя", "понеделник", "вторник", "сряда", "четвъртък", "петък", "събота"],
+        days_short: ["нд", "пн", "вт", "ср", "чт", "пт", "сб"],
+    },
+    DateLanguage {
         code: "te",
         name: "తెలుగు",
         months: ["జనవరి", "ఫిబ్రవరి", "మార్చి", "ఏప్రిల్", "మే", "జూన్", "జులై", "ఆగస్టు", "సెప్టెంబర్", "అక్టోబర్", "నవంబర్", "డిసెంబర్"],
@@ -156,6 +174,50 @@ pub const DATE_LANGUAGES: [DateLanguage; 10] = [
         months_short: ["జన", "ఫిబ్ర", "మార్చి", "ఏప్రి", "మే", "జూన్", "జులై", "ఆగ", "సెప్టెం", "అక్టో", "నవం", "డిసెం"],
         days: ["ఆదివారం", "సోమవారం", "మంగళవారం", "బుధవారం", "గురువారం", "శుక్రవారం", "శనివారం"],
         days_short: ["ఆది", "సోమ", "మంగళ", "బుధ", "గురు", "శుక్ర", "శని"],
+    },
+    DateLanguage {
+        code: "hu",
+        name: "Magyar",
+        months: [
+            "január",
+            "február",
+            "március",
+            "április",
+            "május",
+            "június",
+            "július",
+            "augusztus",
+            "szeptember",
+            "október",
+            "november",
+            "december",
+        ],
+        months_with_day: None,
+        months_short: ["jan.", "febr.", "márc.", "ápr.", "máj.", "jún.", "júl.", "aug.", "szept.", "okt.", "nov.", "dec."],
+        days: ["vasárnap", "hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat"],
+        days_short: ["V", "H", "K", "Sze", "Cs", "P", "Szo"],
+    },
+    DateLanguage {
+        code: "uk",
+        name: "Українська",
+        months: ["січень", "лютий", "березень", "квітень", "травень", "червень", "липень", "серпень", "вересень", "жовтень", "листопад", "грудень"],
+        months_with_day: Some([
+            "січня",
+            "лютого",
+            "березня",
+            "квітня",
+            "травня",
+            "червня",
+            "липня",
+            "серпня",
+            "вересня",
+            "жовтня",
+            "листопада",
+            "грудня",
+        ]),
+        months_short: ["січ.", "лют.", "бер.", "квіт.", "трав.", "черв.", "лип.", "серп.", "вер.", "жовт.", "лист.", "груд."],
+        days: ["неділя", "понеділок", "вівторок", "середа", "четвер", "пʼятниця", "субота"],
+        days_short: ["нд", "пн", "вт", "ср", "чт", "пт", "сб"],
     },
 ];
 

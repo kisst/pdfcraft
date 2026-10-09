@@ -295,6 +295,9 @@ pub(crate) fn preferences_body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tok
             .small()
             .color(t.text_muted),
     );
+    // The web build has no file paths to reopen.
+    #[cfg(not(target_arch = "wasm32"))]
+    ui.checkbox(&mut app.reopen_last_session, tl!("Reopen the files that were open when PdfCraft last closed"));
     ui.add_space(8.0);
     // Identity: the author of new comments (Acrobat: Preferences ▸ Identity).
     ui.label(egui::RichText::new(tl!("Identity")).font(theme::semibold(13.0)));
@@ -303,6 +306,12 @@ pub(crate) fn preferences_body(ui: &mut egui::Ui, app: &mut PdfCraftApp, t: &Tok
         ui.add(egui::TextEdit::singleline(&mut app.comment_prefs.author).desired_width(220.0).char_limit(crate::MAX_AUTHOR_CHARS))
             .labelled_by(label.id);
     });
+    ui.add_space(8.0);
+    ui.label(egui::RichText::new(tl!("Fill & Sign")).font(theme::semibold(13.0)));
+    ui.checkbox(&mut app.flatten_fill_sign_on_save, tl!("Flatten Fill & Sign when saving"));
+    ui.label(
+        egui::RichText::new(tl!("Text, marks and signatures become part of the page. Other comments stay editable.")).small().color(t.text_muted),
+    );
     ui.add_space(8.0);
     date_format(ui, app, t);
     ui.add_space(8.0);
