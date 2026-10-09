@@ -392,6 +392,8 @@ impl Automation {
         Ok(json!({
             "format": self.session.date_format(),
             "language": self.session.date_language().unwrap_or("auto"),
+            // Characters Fill & Sign can't write into a PDF yet; dates with them are refused.
+            "unwritable": dates::unwritable(&today),
             "today": today,
             "presets": dates::DATE_FORMATS,
             "languages": languages,
@@ -432,7 +434,7 @@ impl Automation {
                 if let Some(l) = lang.filter(|l| pdfcraft_engine::dates::date_language(l).is_none()) {
                     return Err(ToolError::InvalidArgs(format!("unknown date language {l:?} (see fill_sign_date_format)")));
                 }
-                let t = self.session.today_text(a.opt_str("format")?, lang).map_err(ToolError::InvalidArgs)?;
+                let t = self.session.today_text_for_pdf(a.opt_str("format")?, lang).map_err(ToolError::InvalidArgs)?;
                 (text_at(&t), t)
             }
             // A typed signature or initials in the script font, left edge at `at`.

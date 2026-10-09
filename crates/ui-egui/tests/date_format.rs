@@ -125,3 +125,36 @@ fn month_names_follow_the_date_language_or_else_the_interface_language() {
     h.state_mut().set_option("date-language", "auto").unwrap();
     assert_eq!(h.state().session.date_language(), None);
 }
+
+#[test]
+fn a_date_the_pdf_cannot_hold_is_refused_with_a_warning_first() {
+    let mut h = Harness::builder().with_size(egui::vec2(1400.0, 900.0)).build_eframe(|_cc| {
+        let mut app = PdfCraftApp::new();
+        app.open_bytes("form.pdf", None, PDF.to_vec()).expect("opens");
+        app.set_option("left", "closed").unwrap();
+        // Japanese weekday names: Fill & Sign text can't hold them yet.
+        app.set_option("date-format", "dddd").unwrap();
+        app.set_option("date-language", "ja").unwrap();
+        app.set_option("dialog", "preferences").unwrap();
+        app
+    });
+    h.run_steps(3);
+    h.get_by_label_contains("can't be written into the PDF yet");
+
+    h.state_mut().set_option("dialog", "none").unwrap();
+    h.run_steps(2);
+    assert!(h.state_mut().execute("sign.fill.date"));
+    h.run_steps(2);
+    let r = h.state().views[0].page_screen_rect(0).expect("on screen");
+    let p = pos2(r.left() + r.width() * 0.2, r.top() + r.height() * 0.2);
+    h.hover_at(p);
+    h.run_steps(1);
+    h.drag_at(p);
+    h.run_steps(1);
+    h.drop_at(p);
+    h.run_steps(4);
+    let s = h.state();
+    assert!(s.session.get(s.views[0].id).unwrap().info.annotations.is_empty(), "nothing placed");
+    let toast = s.toast.as_ref().map(|t| t.0.clone()).unwrap_or_default();
+    assert!(toast.contains("can't be written into the PDF yet"), "{toast}");
+}

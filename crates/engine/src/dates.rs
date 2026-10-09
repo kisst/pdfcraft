@@ -164,6 +164,20 @@ pub fn date_language(code: &str) -> Option<&'static DateLanguage> {
     DATE_LANGUAGES.iter().find(|l| l.code.eq_ignore_ascii_case(code.trim()))
 }
 
+/// The characters of `text` that Fill & Sign can't write into a PDF yet, each once. Its text is
+/// drawn in Helvetica with WinAnsi encoding (Western European letters), so anything else (`ř`,
+/// Japanese, Chinese) would become `?` in the file.
+pub fn unwritable(text: &str) -> String {
+    let mut out = String::new();
+    for c in text.chars() {
+        let mut buf = [0u8; 4];
+        if c != '?' && pdfcraft_fonts::win_ansi(c.encode_utf8(&mut buf)) == b"?" && !out.contains(c) {
+            out.push(c);
+        }
+    }
+    out
+}
+
 /// `fmt` trimmed, when it's a usable date pattern: not too long, showing at least a year,
 /// month or day, and no time letters (`H h M s t`) unless escaped with `\`.
 pub fn check_date_format(fmt: &str) -> Result<&str, String> {
@@ -311,6 +325,18 @@ impl Session {
         let lang = lang.or(self.date_language()).and_then(date_language).unwrap_or(&DATE_LANGUAGES[0]);
         Ok(format_day(fmt, self.today(), lang))
     }
+
+    /// [`Session::today_text`] for writing into a PDF: refused when the date has characters
+    /// Fill & Sign can't write yet (see [`unwritable`]), rather than saving them as `?`.
+    pub fn today_text_for_pdf(&self, fmt: Option<&str>, lang: Option<&str>) -> Result<String, String> {
+        let text = self.today_text(fmt, lang)?;
+        match unwritable(&text) {
+            bad if bad.is_empty() => Ok(text),
+            bad => Err(format!(
+                "\"{text}\" can't be written into the PDF yet: Fill & Sign text is Western European only ({bad}); pick a numeric format such as dd.mm.yyyy"
+            )),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -441,5 +467,20 @@ mod tests {
         assert_eq!(s.date_language(), Some("pt-br"), "an unknown language keeps the previous one");
         s.set_date_language(None).unwrap();
         assert_eq!(s.date_language(), None);
+    }
+
+    #[test]
+    fn dates_the_pdf_cannot_hold_are_refused_not_damaged() {
+        assert_eq!(unwritable("8. října 2026"), "ř");
+        assert_eq!(unwritable("2026年10月8日"), "年月日");
+        assert_eq!(unwritable("sábado, 7 de março – 2026?"), "", "Western European, dashes and ? are fine");
+        let mut s = Session::new().with_clock(|| 1_700_000_000);
+        s.set_date_format("d. mmmm yyyy").unwrap();
+        assert_eq!(s.today_text_for_pdf(None, Some("es")).as_deref(), Ok("14. noviembre 2023"));
+        assert_eq!(s.today_text_for_pdf(None, Some("cs")).as_deref(), Ok("14. listopadu 2023"), "no letter outside WinAnsi");
+        let e = s.today_text_for_pdf(Some("dddd"), Some("ja")).unwrap_err();
+        assert!(e.contains("火曜日") && e.contains("can't be written into the PDF yet"), "{e}");
+        assert!(s.today_text_for_pdf(Some("dd.mm.yyyy"), Some("ja")).is_ok(), "numbers are fine in any language");
+        assert!(s.today_text_for_pdf(Some("yyyy\\年mm\\月"), Some("ja")).unwrap_err().contains("年月"));
     }
 }

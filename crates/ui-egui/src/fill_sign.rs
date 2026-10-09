@@ -367,7 +367,7 @@ pub(crate) fn page_input(
     initials: Option<&SavedSig>,
     preview: &mut Option<(SavedSig, egui::TextureHandle)>,
     author: &str,
-    date_text: &str,
+    date_text: &Result<String, String>,
 ) -> Option<FillAction> {
     let pointer = ui.input(|i| i.pointer.hover_pos())?;
     if !resp.contains_pointer() || !xf.rect.contains(pointer) {
@@ -396,7 +396,10 @@ pub(crate) fn page_input(
             view.fill_text = Some(TypeBox { page, at: [at[0], at[1] + TEXT_SIZE * 0.6], text: String::new(), focus: true });
             None
         }
-        FillTool::Date => Some(FillAction::Edit(Box::new(typed(page, [at[0], at[1] + TEXT_SIZE * 0.6], date_text, author)))),
+        FillTool::Date => Some(match date_text {
+            Ok(text) => FillAction::Edit(Box::new(typed(page, [at[0], at[1] + TEXT_SIZE * 0.6], text, author))),
+            Err(why) => FillAction::Refused(why.clone()),
+        }),
         FillTool::Signature => match signature {
             Some(s) => place(page, at, s, false, author).map(|e| FillAction::Signature(Box::new(e))),
             None => Some(FillAction::CreateSignature),
@@ -424,6 +427,8 @@ pub enum FillAction {
     CreateSignature,
     /// No initials yet.
     CreateInitials,
+    /// Nothing placed, and why (today's date can't be written into the PDF yet).
+    Refused(String),
 }
 
 /// The in-place editor for typed text. Returns the edit once committed.
