@@ -525,7 +525,9 @@ mod tests {
         s.set_date_language(Some("PT-BR")).unwrap();
         assert_eq!(s.date_language(), Some("pt-br"));
         assert_eq!(s.today_text(None, None).as_deref(), Ok("terça-feira 14 novembro"));
-        assert!(s.set_date_language(Some("hu")).unwrap_err().contains("zh-hant"), "only the interface languages");
+        assert_eq!(s.today_text(Some("d mmmm"), Some("uk")).as_deref(), Ok("14 листопада"), "Ukrainian months after a day");
+        assert_eq!(s.today_text(Some("dddd d mmmm"), Some("de")).as_deref(), Ok("Dienstag 14 November"));
+        assert!(s.set_date_language(Some("it")).unwrap_err().contains("zh-hant"), "only the interface languages");
         assert_eq!(s.date_language(), Some("pt-br"), "an unknown language keeps the previous one");
         s.set_date_language(None).unwrap();
         assert_eq!(s.date_language(), None);
